@@ -9,6 +9,8 @@ import { timeAgo } from '../lib/time.js';
 import AppHeader from '../components/AppHeader.jsx';
 import Toolbar from '../components/Toolbar.jsx';
 import { FullPageSpinner } from '../components/RequireAuth.jsx';
+import ShareDialog from '../components/ShareDialog.jsx';
+import Avatar from '../components/Avatar.jsx';
 
 // The editor's feature set, kept to what the product supports. Also used to sanitize imported HTML.
 export const editorExtensions = [
@@ -80,7 +82,15 @@ function DocEditor({ doc }) {
   const { status, error, savedAt, queue, flush } = useAutosave(doc.id);
   const [title, setTitle] = useState(doc.title);
   const [deleting, setDeleting] = useState(false);
+  const [people, setPeople] = useState({ owner: doc.owner, people: [] });
+  const [shareOpen, setShareOpen] = useState(false);
   const titleRef = useRef(null);
+
+  useEffect(() => {
+    api(`/documents/${doc.id}/shares`)
+      .then(setPeople)
+      .catch(() => {});
+  }, [doc.id]);
 
   const editor = useEditor({
     extensions: editorExtensions,
@@ -161,11 +171,21 @@ function DocEditor({ doc }) {
         </div>
         {canWrite && editor && <Toolbar editor={editor} />}
         <div className="editor-bar-right">
+          <div className="avatar-stack" aria-label="People with access">
+            {[people.owner, ...people.people].filter(Boolean).slice(0, 5).map((p) => (
+              <Avatar key={p.email} name={p.name} email={p.email} size={28} />
+            ))}
+          </div>
           {!isOwner && <span className={`chip chip-${doc.role}`}>{doc.role}</span>}
           {isOwner && (
-            <button className="btn btn-danger btn-sm" onClick={onDelete} disabled={deleting}>
-              {deleting ? 'Deleting…' : 'Delete'}
-            </button>
+            <>
+              <button className="btn btn-danger btn-sm" onClick={onDelete} disabled={deleting}>
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+              <button className="btn btn-mint btn-sm" onClick={() => setShareOpen(true)}>
+                Share
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -199,6 +219,16 @@ function DocEditor({ doc }) {
           <EditorContent editor={editor} className="sheet-body" />
         </article>
       </main>
+
+      {shareOpen && (
+        <ShareDialog
+          docId={doc.id}
+          title={title}
+          people={people}
+          onChange={setPeople}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
     </div>
   );
 }
