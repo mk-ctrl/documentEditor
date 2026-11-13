@@ -3,8 +3,8 @@
 ## Links
 
 - **Live app:** https://documenteditor-ivory.vercel.app
-- **Source:** https://github.com/mk-ctrl/documentEditor (also included in this folder)
-- **Walkthrough video:** see [`VIDEO_URL.txt`](VIDEO_URL.txt)
+- **Source:** https://github.com/mk-ctrl/documentEditor (also in this folder as `documentEditor-source.zip`)
+- **Walkthrough video:** https://drive.google.com/file/d/1ud11XIsqGD1n1zBZl3CPVsLk1O3cenkX/view?usp=sharing (also in [`VIDEO_URL.txt`](VIDEO_URL.txt))
 
 ## Test accounts
 
@@ -22,7 +22,7 @@ Pre-shared: "Welcome to Quire" (Alice → Bob as viewer) and "Q3 planning notes"
 
 | Item | Location |
 |---|---|
-| Source code | this folder (`client/`, `server/`, `api/`, `supabase/`, `scripts/`) |
+| Source code | `documentEditor-source.zip` (`client/`, `server/`, `api/`, `supabase/`, `scripts/`, `samples/`, docs), identical to the GitHub repo |
 | Setup and run instructions | [`README.md`](README.md) |
 | Architecture note | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
 | Plain-language walkthrough of how everything works | [`HOW_IT_WORKS.md`](HOW_IT_WORKS.md) |
@@ -32,6 +32,7 @@ Pre-shared: "Welcome to Quire" (Alice → Bob as viewer) and "Q3 planning notes"
 | Automated tests (41) | `server/test/` (run `npm test`) |
 | Sample files for the import feature | [`samples/`](samples/) (`.md`, `.txt`, `.docx`) |
 | Walkthrough video link | [`VIDEO_URL.txt`](VIDEO_URL.txt) |
+| Screenshots (landing, dashboard, editor, share dialog, viewer mode, mobile) | `screenshots/` |
 
 ## Status
 
