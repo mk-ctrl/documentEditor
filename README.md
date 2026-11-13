@@ -109,6 +109,7 @@ Import the repo in Vercel, keep the Vite preset (`vercel.json` sets build, outpu
 
 ## Docs
 
+- [HOW_IT_WORKS.md](HOW_IT_WORKS.md): plain-language walkthrough of every flow (login, editing, sharing, upload) end to end
 - [ARCHITECTURE.md](ARCHITECTURE.md): design, data model, decisions and tradeoffs
 - [AI_WORKFLOW.md](AI_WORKFLOW.md): how AI was used, what was changed or rejected, how it was verified
 - [SUBMISSION.md](SUBMISSION.md): exactly what's included
