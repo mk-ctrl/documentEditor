@@ -25,6 +25,7 @@ Pre-shared: "Welcome to Quire" (Alice → Bob as viewer) and "Q3 planning notes"
 | Source code | this folder (`client/`, `server/`, `api/`, `supabase/`, `scripts/`) |
 | Setup and run instructions | [`README.md`](README.md) |
 | Architecture note | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Plain-language walkthrough of how everything works | [`HOW_IT_WORKS.md`](HOW_IT_WORKS.md) |
 | AI workflow note | [`AI_WORKFLOW.md`](AI_WORKFLOW.md), with the detailed per-phase log in [`AI_LOG.md`](AI_LOG.md) |
 | Build plan and timeline | [`PLAN.md`](PLAN.md) |
 | Database schema | [`supabase/schema.sql`](supabase/schema.sql) |
