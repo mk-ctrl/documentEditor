@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { Placeholder } from '@tiptap/extensions';
 import { api } from '../lib/api.js';
+import { editorExtensions } from '../lib/editorExtensions.js';
 import { useAutosave } from '../lib/useAutosave.js';
 import { timeAgo } from '../lib/time.js';
 import AppHeader from '../components/AppHeader.jsx';
@@ -11,17 +10,6 @@ import Toolbar from '../components/Toolbar.jsx';
 import { FullPageSpinner } from '../components/RequireAuth.jsx';
 import ShareDialog from '../components/ShareDialog.jsx';
 import Avatar from '../components/Avatar.jsx';
-
-// The editor's feature set, kept to what the product supports. Also used to sanitize imported HTML.
-export const editorExtensions = [
-  StarterKit.configure({
-    heading: { levels: [1, 2, 3] },
-    code: false,
-    codeBlock: false,
-    link: false,
-  }),
-  Placeholder.configure({ placeholder: 'Start writing…' }),
-];
 
 export default function EditorPage() {
   const { id } = useParams();
