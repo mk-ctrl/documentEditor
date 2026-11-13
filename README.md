@@ -11,7 +11,7 @@ You can **create your own account** (*No account yet? Create one* on the login p
 
 | User | Email | Password |
 |---|---|---|
-| Alice Park | `alice@example.com` | `<DEMO PASSWORD>` |
+| Alice Park | `alice@example.com` | `mirun2005` |
 | Bob Rivera | `bob@example.com` | same |
 | Carol Singh | `carol@example.com` | same |
 
