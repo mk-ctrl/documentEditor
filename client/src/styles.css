@@ -1,0 +1,46 @@
+/* Design tokens. Placeholder values until the UI reference is chosen; every component reads these. */
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --text: #1c1c1a;
+  --text-muted: #6b6b66;
+  --border: #e6e5e0;
+  --accent: #2f5d50;
+  --danger: #b3261e;
+
+  --font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-doc: Georgia, 'Times New Roman', serif;
+
+  --radius: 6px;
+  --space: 8px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+.placeholder {
+  max-width: 640px;
+  margin: 15vh auto;
+  padding: 0 16px;
+}
+
+.status {
+  color: var(--text-muted);
+  font-size: 14px;
+}
