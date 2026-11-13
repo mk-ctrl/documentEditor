@@ -14,9 +14,12 @@ const DEMO_USERS = [
 const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || '';
 
 export default function Login() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mode, setMode] = useState(location.pathname === '/signup' ? 'signup' : 'signin');
+  const isSignup = mode === 'signup';
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,16 +28,32 @@ export default function Login() {
   const dest = location.state?.from || '/';
   if (!loading && user) return <Navigate to={dest} replace />;
 
-  async function submit(e, creds = { email, password }) {
+  function switchMode(next) {
+    setMode(next);
+    setError('');
+    navigate(next === 'signup' ? '/signup' : '/login', { replace: true, state: location.state });
+  }
+
+  async function submit(e, creds = { email, password }, asSignup = isSignup) {
     e?.preventDefault();
     setError('');
+    if (asSignup && !name.trim()) {
+      setError('Enter your name.');
+      return;
+    }
     if (!creds.email.trim() || !creds.password) {
       setError('Enter your email and password.');
       return;
     }
+    if (asSignup && creds.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
     setBusy(true);
     try {
-      await signIn(creds.email.trim().toLowerCase(), creds.password);
+      const cleanEmail = creds.email.trim().toLowerCase();
+      if (asSignup) await signUp(name.trim(), cleanEmail, creds.password);
+      else await signIn(cleanEmail, creds.password);
       navigate(dest, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -47,7 +66,7 @@ export default function Login() {
     setEmail(u.email);
     if (DEMO_PASSWORD) {
       setPassword(DEMO_PASSWORD);
-      submit(null, { email: u.email, password: DEMO_PASSWORD });
+      submit(null, { email: u.email, password: DEMO_PASSWORD }, false);
     }
   }
 
@@ -73,10 +92,24 @@ export default function Login() {
         </section>
 
         <section className="paper auth-sheet" aria-labelledby="login-title">
-          <p className="eyebrow">Welcome back</p>
-          <h2 id="login-title">Sign in</h2>
+          <p className="eyebrow">{isSignup ? 'New here?' : 'Welcome back'}</p>
+          <h2 id="login-title">{isSignup ? 'Create your account' : 'Sign in'}</h2>
 
           <form className="auth-form" onSubmit={submit} noValidate>
+            {isSignup && (
+              <div className="field">
+                <label htmlFor="name">Name</label>
+                <input
+                  id="name"
+                  className="input"
+                  autoComplete="name"
+                  placeholder="Ada Lovelace"
+                  maxLength={80}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
             <div className="field">
               <label htmlFor="email">Email</label>
               <input
@@ -95,8 +128,8 @@ export default function Login() {
                 id="password"
                 className="input"
                 type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
+                autoComplete={isSignup ? 'new-password' : 'current-password'}
+                placeholder={isSignup ? 'At least 8 characters' : '••••••••'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -107,9 +140,16 @@ export default function Login() {
               </p>
             )}
             <button className="btn btn-mint" type="submit" disabled={busy}>
-              {busy ? 'Signing in…' : 'Sign in'}
+              {busy ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
             </button>
           </form>
+
+          <p className="auth-switch">
+            {isSignup ? 'Already have an account?' : 'No account yet?'}{' '}
+            <button type="button" className="link-btn" onClick={() => switchMode(isSignup ? 'signin' : 'signup')}>
+              {isSignup ? 'Sign in' : 'Create one'}
+            </button>
+          </p>
 
           <div className="demo-users">
             <p>{DEMO_PASSWORD ? 'Or jump in as a demo user:' : 'Demo users (password in the README):'}</p>

@@ -21,6 +21,16 @@ describe('app wiring', () => {
     expect(res.body.error).toMatch(/malformed json/i);
   });
 
+  it('validates sign-up input before touching the database', async () => {
+    const short = await request(app).post('/api/auth/signup').send({ name: 'A', email: 'a@b.co', password: 'short' });
+    expect(short.status).toBe(400);
+    expect(short.body.error).toMatch(/at least 8/);
+    const noName = await request(app).post('/api/auth/signup').send({ name: ' ', email: 'a@b.co', password: 'longenough' });
+    expect(noName.status).toBe(400);
+    const badEmail = await request(app).post('/api/auth/signup').send({ name: 'A', email: 'nope', password: 'longenough' });
+    expect(badEmail.status).toBe(400);
+  });
+
   it('requires a token for private routes', async () => {
     const res = await request(app).get('/api/me');
     expect(res.status).toBe(401);

@@ -28,13 +28,14 @@ Pre-shared: "Welcome to Quire" (Alice → Bob as viewer) and "Q3 planning notes"
 | AI workflow note | [`AI_WORKFLOW.md`](AI_WORKFLOW.md), with the detailed per-phase log in [`AI_LOG.md`](AI_LOG.md) |
 | Build plan and timeline | [`PLAN.md`](PLAN.md) |
 | Database schema | [`supabase/schema.sql`](supabase/schema.sql) |
-| Automated tests (39) | `server/test/` (run `npm test`) |
+| Automated tests (41) | `server/test/` (run `npm test`) |
 | Sample files for the import feature | [`samples/`](samples/) (`.md`, `.txt`, `.docx`) |
 | Walkthrough video link | [`VIDEO_URL.txt`](VIDEO_URL.txt) |
 
 ## Status
 
 **Working end to end:**
+- Account sign-up and sign-in (plus one-click demo users).
 - Create, rename, edit, delete and reopen documents.
 - Rich text: B / I / U, H1 / H2, lists.
 - Autosave with status.
@@ -45,7 +46,7 @@ Pre-shared: "Welcome to Quire" (Alice → Bob as viewer) and "Q3 planning notes"
 
 **Intentionally not built:**
 - Real-time co-editing.
-- Sign-up.
+- Password reset and email verification.
 - Comments, version history and export.
 - Import into an existing document.
 

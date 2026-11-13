@@ -46,6 +46,11 @@ export function AuthProvider({ children }) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message);
       },
+      async signUp(name, email, password) {
+        await api('/auth/signup', { method: 'POST', body: { name, email, password } });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw new Error(error.message);
+      },
       async signOut() {
         await supabase.auth.signOut();
       },

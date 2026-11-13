@@ -439,3 +439,21 @@ textarea {
     padding: 44px 24px 28px;
   }
 }
+
+.auth-switch {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--mint-strong);
+  cursor: pointer;
+}

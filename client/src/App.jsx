@@ -13,6 +13,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Login />} />
         <Route path="/" element={priv(<Dashboard />)} />
         <Route path="/d/:id" element={priv(<EditorPage />)} />
         <Route path="*" element={<NotFound />} />

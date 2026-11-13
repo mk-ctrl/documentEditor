@@ -7,7 +7,7 @@ Create, format, import and share documents in the browser. Built for the Ajaia f
 
 ## Try it in 60 seconds (reviewers)
 
-Sign-up is intentionally out of scope. Use the seeded accounts. On the login page, **click a name chip to sign in instantly**.
+You can **create your own account** (*No account yet? Create one* on the login page, or go to `/signup`), or use the seeded accounts. On the login page, **click a name chip to sign in instantly**.
 
 | User | Email | Password |
 |---|---|---|
@@ -31,6 +31,7 @@ Suggested walkthrough:
 
 | Area | What works |
 |---|---|
+| Accounts | Sign up (name, email, password ≥ 8) with instant sign-in and no email confirmation step. Sign in, sign out, and one-click demo users. |
 | Documents | Create, rename (inline title), edit, delete (owner), reopen. Owned vs shared shelves. |
 | Editor | Tiptap rich text: bold, italic, underline, H1/H2, paragraph, bulleted and numbered lists, undo/redo, keyboard shortcuts. |
 | Saving | Debounced autosave (0.8 s) with status (*Unsaved changes / Saving… / Saved / Not saved + Retry*), Ctrl+S, unsaved-changes warning on tab close. |
@@ -73,7 +74,7 @@ Import the repo in Vercel, keep the Vite preset (`vercel.json` sets build, outpu
 
 ## Tests
 
-39 tests across 4 files:
+41 tests across 4 files:
 
 - **Access matrix** (`access.test.js`): every role × action (read / write / share / delete), plus "a share on another document grants nothing".
 - **Import** (`importFile.test.js`): txt / md / docx conversion (docx generated in-memory), HTML escaping, rejects pdf, empty, fake-docx and non-UTF-8 files.
@@ -83,14 +84,15 @@ Import the repo in Vercel, keep the Vite preset (`vercel.json` sets build, outpu
   - viewer and stranger 403s
   - full share lifecycle (grant → upgrade → revoke)
   - import limits (415 / 413)
+  - sign-up (new user can sign in, gets a profile, can be shared with; duplicate email gives 409)
   - input validation, including that you can't spoof `owner_id`
-- **App wiring** (`app.test.js`): 401 without or with a forged token, JSON 404, malformed JSON gives 400, DB health.
+- **App wiring** (`app.test.js`): sign-up validation, 401 without or with a forged token, JSON 404, malformed JSON gives 400, DB health.
 
 ## What's in scope, and what isn't
 
 **Deliberately cut** (see [ARCHITECTURE.md](ARCHITECTURE.md) for why):
 - Real-time co-editing and presence. Saves are last-write-wins.
-- Sign-up and password reset. Accounts are seeded.
+- Password reset and email verification. Sign-up creates confirmed accounts directly, which suits an internal demo but would need verification and rate limiting in production.
 - Comments, suggestions, version history, export, images, tables, links.
 - Import into an *existing* document, and attachments.
 
