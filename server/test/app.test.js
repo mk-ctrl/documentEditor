@@ -21,6 +21,17 @@ describe('app wiring', () => {
     expect(res.body.error).toMatch(/malformed json/i);
   });
 
+  it('requires a token for private routes', async () => {
+    const res = await request(app).get('/api/me');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toMatch(/sign in/i);
+  });
+
+  it.skipIf(!hasDb)('rejects a forged token', async () => {
+    const res = await request(app).get('/api/me').set('Authorization', 'Bearer not-a-real-token');
+    expect(res.status).toBe(401);
+  });
+
   it.skipIf(!hasDb)('reports a healthy database connection', async () => {
     const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
