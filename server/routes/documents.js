@@ -2,8 +2,10 @@ import { Router } from 'express';
 import { supabaseAdmin } from '../lib/supabaseAdmin.js';
 import { requireDocAccess } from '../lib/access.js';
 import { parse, createDocumentSchema, updateDocumentSchema } from '../lib/validation.js';
+import sharesRouter from './shares.js';
 
 const router = Router();
+router.use('/:id/shares', sharesRouter);
 const LIST_FIELDS = 'id, title, owner_id, created_at, updated_at';
 
 // GET /api/documents → { owned: [...], shared: [...] }

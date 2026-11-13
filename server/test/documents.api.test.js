@@ -89,6 +89,44 @@ describe.skipIf(!configured)('documents API (integration)', () => {
     expect(bobDelete.status).toBe(403);
   });
 
+  it('sharing: grant, upgrade, revoke, and only the owner can manage access', async () => {
+    const create = await request(app).post('/api/documents').set(as('alice')).send({ title: 'Share test' });
+    const id = create.body.id;
+    created.push(id);
+    const shares = `/api/documents/${id}/shares`;
+
+    // stranger before sharing
+    expect((await request(app).get(`/api/documents/${id}`).set(as('carol'))).status).toBe(403);
+
+    // grant viewer → carol can read, not write, and sees it under "shared"
+    const grant = await request(app).post(shares).set(as('alice')).send({ email: 'CAROL@example.com', role: 'viewer' });
+    expect(grant.status).toBe(201);
+    expect(grant.body.people).toEqual([expect.objectContaining({ email: 'carol@example.com', role: 'viewer' })]);
+    expect((await request(app).get(`/api/documents/${id}`).set(as('carol'))).body.role).toBe('viewer');
+    expect((await request(app).patch(`/api/documents/${id}`).set(as('carol')).send({ title: 'x' })).status).toBe(403);
+    const carolList = await request(app).get('/api/documents').set(as('carol'));
+    expect(carolList.body.shared.some((d) => d.id === id)).toBe(true);
+
+    // upgrade to editor → carol can write, but still can't share or delete
+    await request(app).post(shares).set(as('alice')).send({ email: 'carol@example.com', role: 'editor' });
+    expect((await request(app).patch(`/api/documents/${id}`).set(as('carol')).send({ title: 'Edited by Carol' })).status).toBe(200);
+    expect((await request(app).post(shares).set(as('carol')).send({ email: 'bob@example.com', role: 'viewer' })).status).toBe(403);
+    expect((await request(app).delete(`/api/documents/${id}`).set(as('carol'))).status).toBe(403);
+
+    // validation
+    expect((await request(app).post(shares).set(as('alice')).send({ email: 'nobody@example.com', role: 'viewer' })).status).toBe(404);
+    expect((await request(app).post(shares).set(as('alice')).send({ email: 'alice@example.com', role: 'viewer' })).status).toBe(400);
+    expect((await request(app).post(shares).set(as('alice')).send({ email: 'bob@example.com', role: 'owner' })).status).toBe(400);
+    expect((await request(app).post(shares).set(as('alice')).send({ email: 'not-an-email', role: 'viewer' })).status).toBe(400);
+
+    // revoke → carol loses access immediately
+    const carolId = grant.body.people[0].id;
+    const revoke = await request(app).delete(`${shares}/${carolId}`).set(as('alice'));
+    expect(revoke.status).toBe(200);
+    expect(revoke.body.people).toEqual([]);
+    expect((await request(app).get(`/api/documents/${id}`).set(as('carol'))).status).toBe(403);
+  });
+
   it('validates input', async () => {
     const empty = await request(app).post('/api/documents').set(as('alice')).send({ title: '   ' });
     expect(empty.status).toBe(400);
