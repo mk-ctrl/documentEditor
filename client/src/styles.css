@@ -457,3 +457,116 @@ textarea {
   text-decoration-color: var(--mint-strong);
   cursor: pointer;
 }
+
+/* ── Shared motion primitives (used by every screen) ─────── */
+.shapes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.shape-square {
+  width: var(--size, 34px);
+  height: var(--size, 34px);
+  border-width: max(3px, calc(var(--size, 34px) * 0.14));
+}
+.shape-ring {
+  width: var(--size, 38px);
+  height: var(--size, 38px);
+  border-width: max(3px, calc(var(--size, 38px) * 0.13));
+}
+.shape-tri {
+  border-left-width: calc(var(--size, 44px) * 0.5);
+  border-right-width: calc(var(--size, 44px) * 0.5);
+  border-bottom-width: calc(var(--size, 44px) * 0.86);
+}
+
+/* Scroll reveal: add .reveal to a container and attach useReveal()'s ref. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.reveal .reveal-child {
+  opacity: 0;
+  transform: translateY(22px) scale(0.98);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transition-delay: calc(var(--i, 0) * 80ms + 120ms);
+}
+.reveal.is-visible .reveal-child {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal .reveal-child {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Toasts ──────────────────────────────────────────────── */
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 100;
+  display: grid;
+  gap: 8px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--desk);
+  color: var(--on-desk);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+  animation: toast-in 0.45s var(--ease) both;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+.toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--on-desk-muted);
+  flex: none;
+}
+.toast-success .toast-dot {
+  background: var(--mint);
+}
+.toast-error .toast-dot {
+  background: var(--coral);
+}
+.toast-x {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-desk-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.toast-x:hover {
+  background: var(--desk-soft);
+  color: var(--on-desk);
+}
