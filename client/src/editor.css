@@ -1,0 +1,832 @@
+/*
+  Editor surface (/d/:id): the desk, the sheet stack, rails, toolbar motion, save indicator,
+  viewer banner, error sheets and the share dialog.
+  Loaded after app.css, so equal-specificity rules here win. Tokens come from styles.css.
+*/
+
+/* ── Page frame ──────────────────────────────────────────── */
+.editor-page {
+  /* rotated stack sheets and drifting shapes must never cause sideways page scroll.
+     `clip` (unlike `hidden`) doesn't create a scroll container, so sticky rails keep working. */
+  overflow-x: clip;
+}
+
+.editor-page .editor-bar {
+  animation: ed-bar-in 0.6s var(--ease) both;
+}
+@keyframes ed-bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+.editor-page .editor-bar > * {
+  min-width: 0;
+}
+
+/* ── Save indicator ──────────────────────────────────────── */
+.editor-page .save-status {
+  justify-self: start;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-soft);
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.save-icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--mint-strong);
+  color: #fff;
+  transition: background 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.save-icon svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* the check draws itself each time a save lands */
+.save-icon svg.is-fresh {
+  stroke-dasharray: 12;
+  animation: ed-check-draw 0.55s var(--ease) 0.05s both;
+}
+@keyframes ed-check-draw {
+  from {
+    stroke-dashoffset: 12;
+  }
+}
+.save-status:has(svg.is-fresh) .save-icon {
+  animation: ed-icon-pop 0.45s var(--ease);
+}
+@keyframes ed-icon-pop {
+  45% {
+    transform: scale(1.3);
+  }
+}
+.save-status.is-dirty .save-icon {
+  background: var(--tan);
+  transform: scale(0.55);
+}
+.save-status.is-saving .save-icon {
+  background: transparent;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--tan);
+  animation: spin 0.8s linear infinite;
+}
+.save-status.is-error {
+  color: var(--danger);
+}
+.save-status.is-error .save-icon {
+  background: var(--coral);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+.save-status.is-readonly .save-icon {
+  background: var(--sun);
+  color: #5c5410;
+}
+.save-status.is-readonly .save-icon svg {
+  width: 11px;
+  height: 11px;
+  stroke-width: 2;
+}
+.save-label {
+  /* shrinks with an ellipsis instead of spilling out of the pill on narrow bars */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: ed-label-in 0.35s var(--ease) both;
+}
+.editor-page .save-status .btn {
+  flex: none;
+}
+@keyframes ed-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.editor-page .save-status .btn {
+  height: 24px;
+  padding: 0 10px;
+  margin-right: -6px;
+}
+
+/* ── Floating toolbar ────────────────────────────────────── */
+.editor-page .toolbar {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  animation: ed-tb-in 0.7s var(--ease) 0.12s both;
+}
+.editor-page .toolbar::-webkit-scrollbar {
+  display: none;
+}
+@keyframes ed-tb-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.94);
+  }
+}
+.editor-page .tb-btn,
+.editor-page .tb-sep {
+  flex: none;
+}
+.editor-page .tb-btn {
+  transition: background 0.22s var(--ease), color 0.22s var(--ease), transform 0.22s var(--ease);
+}
+.editor-page .tb-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.editor-page .tb-btn.is-active {
+  animation: ed-tb-pop 0.32s var(--ease);
+}
+@keyframes ed-tb-pop {
+  45% {
+    transform: scale(1.14);
+  }
+}
+/* the toolbar scrolls inside itself on phones, so keep focus rings inside its box */
+.editor-page .tb-btn:focus-visible {
+  outline-offset: -3px;
+}
+
+/* ── Collaborator avatars in the bar ─────────────────────── */
+.editor-page .avatar-stack .avatar,
+.editor-page .avatar-stack .avatar:first-child {
+  margin-left: 0;
+}
+.avatar-pop {
+  display: inline-flex;
+  animation: ed-avatar-in 0.5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 0.3s);
+}
+.avatar-pop + .avatar-pop {
+  margin-left: -8px;
+}
+@keyframes ed-avatar-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.7);
+  }
+}
+.editor-bar-right .btn svg {
+  margin-left: -3px;
+}
+
+/* ── The desk ────────────────────────────────────────────── */
+.editor-page .desk {
+  position: relative;
+  isolation: isolate;
+  padding: 36px 20px 120px;
+}
+/* full-bleed mint band the sheet floats over, like the coloured panels on the reference site */
+.desk-band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 360px;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--mint);
+  animation: ed-band-in 0.9s var(--ease) both;
+}
+@keyframes ed-band-in {
+  from {
+    opacity: 0;
+  }
+}
+/* faint shapes pinned to the viewport edges, behind everything */
+.desk-decor {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.desk-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+  max-width: 816px;
+  margin: 0 auto;
+}
+.desk-rail-left {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .desk-grid {
+    max-width: 1440px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 740px) minmax(0, 1fr);
+    gap: 36px;
+  }
+  .desk-rail {
+    position: sticky;
+    top: 136px;
+    align-self: start;
+    width: min(250px, 100%);
+  }
+  .desk-rail-left {
+    display: block;
+    justify-self: end;
+  }
+  .desk-rail-right {
+    justify-self: start;
+  }
+}
+@media (min-width: 1400px) {
+  .desk-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 816px) minmax(0, 1fr);
+  }
+}
+
+/* ── Sheet on a stack of papers ──────────────────────────── */
+.sheet-stack {
+  position: relative;
+  isolation: isolate;
+}
+/* two sheets peeking out behind the document; they fan out after it lands */
+.sheet-stack::before,
+.sheet-stack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #fbfaf7;
+  box-shadow: var(--shadow-card);
+}
+.sheet-stack::before {
+  transform: translate(9px, 9px) rotate(1deg);
+  animation: ed-fan 0.9s var(--ease) 0.35s both;
+}
+.sheet-stack::after {
+  background: #f6f4ef;
+  transform: translate(-7px, 15px) rotate(-1.3deg);
+  animation: ed-fan 0.9s var(--ease) 0.45s both;
+}
+@keyframes ed-fan {
+  from {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.editor-page .sheet {
+  max-width: none;
+  min-height: 960px;
+  padding: 72px 84px 96px;
+  animation: ed-sheet-rise 0.85s var(--ease) both;
+}
+@keyframes ed-sheet-rise {
+  from {
+    opacity: 0;
+    transform: translateY(44px) scale(0.985);
+  }
+}
+.editor-page .sheet-title {
+  margin-bottom: 14px;
+}
+/* small mint rule under the title; it stretches while you rename the document */
+.sheet-rule {
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-bottom: 30px;
+  border-radius: 2px;
+  background: var(--mint);
+  transition: width 0.45s var(--ease), background 0.3s;
+}
+.sheet-title:not([readonly]):focus + .sheet-rule {
+  width: 110px;
+  background: var(--coral);
+}
+/* outline jumps land below the sticky header + editor bar */
+.sheet-body .tiptap h1,
+.sheet-body .tiptap h2,
+.sheet-body .tiptap h3 {
+  scroll-margin-top: 150px;
+}
+
+/* ── Rails ───────────────────────────────────────────────── */
+.rail-card {
+  position: relative;
+  padding: 26px 20px 18px;
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  animation: ed-rail-in 0.8s var(--ease) 0.5s both;
+}
+/* the same pencil stroke as every paper sheet */
+.rail-card::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 14px;
+  width: 12px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: #c8c5be;
+  transform: rotate(-40deg);
+}
+@keyframes ed-rail-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+.rail-eyebrow {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  /* --muted is only ~3.4:1 on white; small text here needs the darker ink */
+  color: var(--ink-soft);
+}
+
+/* outline */
+.doc-outline {
+  max-height: calc(100vh - 170px);
+  overflow-y: auto;
+}
+.outline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.outline-item {
+  animation: ed-outline-in 0.5s var(--ease) both;
+  animation-delay: calc(min(var(--i, 0), 10) * 45ms + 0.6s);
+}
+@keyframes ed-outline-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+.outline-item button {
+  display: block;
+  width: 100%;
+  padding: 6px 10px 6px 12px;
+  border: 0;
+  border-left: 2px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: color 0.2s, background 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.outline-item button:hover {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.03);
+}
+.outline-item button.is-active {
+  border-left-color: var(--coral);
+  background: rgba(166, 216, 201, 0.22);
+  color: var(--ink);
+  font-weight: 600;
+}
+.outline-item.lvl-1 button {
+  font-weight: 600;
+}
+.outline-item.lvl-2 button {
+  padding-left: 24px;
+}
+.outline-item.lvl-3 button {
+  padding-left: 36px;
+  font-size: 13px;
+}
+.outline-empty {
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* document stats */
+.stat-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding-bottom: 14px;
+}
+.stat-figure strong {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.stat-figure {
+  min-width: 0;
+}
+.stat-figure span {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.stat-list {
+  margin: 0;
+}
+.stat-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 40px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--line-strong);
+}
+.stat-list dt {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.stat-list dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stat-people {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.stat-people .avatar-stack {
+  margin: 0;
+}
+.stat-people .avatar-stack .avatar {
+  box-shadow: 0 0 0 2px var(--paper);
+}
+.stat-people .avatar-stack .avatar + .avatar {
+  margin-left: -6px;
+}
+.stat-copy {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+}
+
+/* in the narrow side rail (174-250px wide) three figures side by side overflow once
+   counts reach the thousands, so stack them as "1,234 words" rows instead */
+@media (min-width: 1200px) {
+  .stat-figures {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .stat-figure {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .stat-figure strong {
+    display: inline;
+    font-size: 24px;
+  }
+}
+
+/* below the wide layout the stats become a footer card under the sheet */
+@media (max-width: 1199px) {
+  .doc-stats {
+    margin-top: 8px;
+  }
+}
+@media (min-width: 700px) and (max-width: 1199px) {
+  .doc-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    column-gap: 32px;
+    align-items: start;
+  }
+  .doc-stats .rail-eyebrow {
+    grid-column: 1 / -1;
+  }
+  .doc-stats .stat-copy {
+    grid-column: 1;
+    grid-row: 3;
+    width: auto;
+    justify-self: start;
+  }
+}
+
+/* ── Viewer banner ───────────────────────────────────────── */
+.viewer-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--sun);
+  color: #4d4610;
+  box-shadow: var(--shadow-card);
+  animation: ed-banner-in 0.7s var(--ease) 0.2s both;
+}
+@keyframes ed-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+.viewer-banner-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex: none;
+  background: rgba(255, 255, 255, 0.6);
+}
+.viewer-banner strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.viewer-banner .readonly-note {
+  max-width: none;
+  margin: 2px 0 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-serif);
+  font-size: 16px;
+}
+
+/* ── Error sheets (403 / 404 / other) ────────────────────── */
+.doc-error {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 64px);
+  padding: 48px 16px 64px;
+  background: var(--desk);
+}
+.doc-error .sheet-stack {
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+}
+.doc-error .error-sheet {
+  max-width: none;
+  padding: 56px 44px 40px;
+  animation: ed-sheet-rise 0.85s var(--ease) both;
+}
+.error-kicker {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: var(--ink-soft);
+}
+.doc-error .error-sheet h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.error-body {
+  margin: 0 0 22px;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+.error-lines {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 28px;
+}
+.error-lines span {
+  height: 6px;
+  border-radius: 3px;
+  background: #ebe9e4;
+}
+.error-lines .is-marked {
+  background: var(--sun);
+}
+
+/* ── Share dialog ────────────────────────────────────────── */
+.modal.share-modal {
+  width: min(580px, 100%);
+  padding: 0;
+  overflow-x: hidden;
+}
+.share-modal::before {
+  z-index: 2;
+  background: rgba(31, 77, 65, 0.4);
+}
+.share-head {
+  position: relative;
+  overflow: hidden;
+  padding: 46px 36px 26px;
+  background: var(--mint);
+  color: var(--mint-ink);
+}
+.share-head > :not(.shapes) {
+  position: relative;
+  z-index: 1;
+}
+.modal .share-head .eyebrow {
+  /* full-strength mint ink: at reduced opacity this 13px label fell below 4.5:1 on mint */
+  color: var(--mint-ink);
+  font-weight: 600;
+}
+.modal .share-head h2 {
+  margin: 2px 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+}
+.share-sub {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 17px;
+}
+.share-body {
+  padding: 24px 36px 26px;
+}
+.role-help {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+  animation: ed-label-in 0.35s var(--ease) both;
+}
+.role-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+.role-dot-viewer {
+  background: var(--sun);
+  box-shadow: 0 0 0 1px #d9d17a;
+}
+.role-dot-editor {
+  background: var(--mint-strong);
+}
+.share-body .hint {
+  margin-top: 4px;
+}
+
+/* rows slide in (staggered on open) and collapse out when removed */
+.share-modal .people li {
+  animation: ed-row-in 0.45s var(--ease) both;
+  animation-delay: calc(min(var(--i, 0), 8) * 60ms + 0.15s);
+}
+@keyframes ed-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+.share-modal .people li.is-leaving {
+  overflow: hidden;
+  animation: ed-row-out 0.26s var(--ease) forwards;
+}
+@keyframes ed-row-out {
+  from {
+    max-height: 120px;
+  }
+  to {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    transform: translateX(16px);
+    border-bottom-color: transparent;
+  }
+}
+
+.share-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 10px 10px 10px 14px;
+  border-radius: var(--radius);
+  background: var(--canvas);
+}
+.share-link p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+.share-link-icon {
+  flex: none;
+  color: var(--muted);
+}
+.share-copy {
+  flex: none;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+/* ── Small screens ───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .editor-page .editor-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 8px 16px 12px;
+  }
+  .editor-page .editor-bar .toolbar {
+    justify-self: center;
+  }
+  .editor-page .sheet {
+    min-height: 720px;
+    padding: 52px 28px 64px;
+  }
+}
+@media (max-width: 560px) {
+  .editor-page .desk {
+    padding: 22px 12px 96px;
+  }
+  .desk-band {
+    height: 240px;
+  }
+  .desk-decor {
+    display: none;
+  }
+  .editor-bar-right .avatar-stack {
+    display: none;
+  }
+  /* the toast carries the full error message on phones */
+  .editor-page .save-error {
+    display: none;
+  }
+  .editor-page .sheet {
+    padding: 44px 20px 56px;
+  }
+  .editor-page .sheet-title {
+    font-size: 27px;
+  }
+  .sheet-body .tiptap {
+    font-size: 18px;
+  }
+  /* gentler stack offsets so nothing pokes past the edge of a narrow screen */
+  .sheet-stack::before {
+    transform: translate(4px, 7px) rotate(0.6deg);
+  }
+  .sheet-stack::after {
+    transform: translate(-4px, 12px) rotate(-0.8deg);
+  }
+  .viewer-banner {
+    padding: 14px 16px;
+  }
+  .doc-error .error-sheet {
+    padding: 48px 24px 32px;
+  }
+  .share-head {
+    padding: 40px 20px 20px;
+  }
+  .share-body {
+    padding: 20px 20px 22px;
+  }
+  .share-link {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Reduced motion: everything lands in its final state, nothing drifts or spins ── */
+@media (prefers-reduced-motion: reduce) {
+  .editor-page *,
+  .editor-page *::before,
+  .editor-page *::after,
+  .doc-error *,
+  .doc-error *::before,
+  .doc-error *::after,
+  .share-modal,
+  .share-modal *,
+  .share-modal *::before,
+  .share-modal *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

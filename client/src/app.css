@@ -18,6 +18,11 @@
   background: rgba(242, 241, 238, 0.92);
   backdrop-filter: blur(8px);
 }
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0 16px;
+  }
+}
 .app-header-actions {
   display: flex;
   align-items: center;
@@ -33,57 +38,7 @@
 }
 
 /* ── Dashboard ───────────────────────────────────────────── */
-.dashboard {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 28px 28px 80px;
-}
-.dash-hero {
-  margin: 12px 0 36px;
-}
-.dash-hero .kicker {
-  margin: 0;
-  font-size: 22px;
-  color: var(--ink-soft);
-}
-.dash-hero h1 {
-  margin: 0;
-  font-size: clamp(40px, 5vw, 60px);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
-}
-.dash-section {
-  margin-bottom: 48px;
-}
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 18px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-.section-title .count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  font-size: 12px;
-  letter-spacing: 0;
-}
-.doc-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 28px;
-}
+
 .doc-card {
   display: flex;
   flex-direction: column;
@@ -185,14 +140,6 @@ a.doc-card:hover {
     background-position: -150% 0;
   }
 }
-.empty {
-  margin: 0;
-  padding: 28px;
-  border: 1px dashed var(--line-strong);
-  border-radius: var(--radius);
-  color: var(--ink-soft);
-  font-size: 18px;
-}
 
 /* ── Role chips ──────────────────────────────────────────── */
 .chip {
@@ -245,35 +192,13 @@ a.doc-card:hover {
   color: var(--muted);
   min-width: 0;
 }
-.save-status .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--mint-strong);
-  flex: none;
-}
-.save-status.is-dirty .dot,
-.save-status.is-saving .dot {
-  background: var(--tan);
-}
-.save-status.is-saving .dot {
-  animation: pulse 0.9s ease-in-out infinite;
-}
 .save-status.is-error {
   color: var(--danger);
-}
-.save-status.is-error .dot {
-  background: var(--danger);
 }
 .save-error {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-@keyframes pulse {
-  50% {
-    opacity: 0.3;
-  }
 }
 
 /* floating charcoal toolbar */
@@ -605,16 +530,4 @@ a.doc-card:hover {
   .people li {
     flex-wrap: wrap;
   }
-}
-
-.dash-sub {
-  margin: 10px 0 0;
-  max-width: 560px;
-  font-size: 18px;
-  color: var(--ink-soft);
-}
-.dash-sub b {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 600;
 }
