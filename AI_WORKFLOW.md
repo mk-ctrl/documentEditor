@@ -33,7 +33,7 @@
 
 ## How I verified correctness, UX and reliability
 
-- **Automated:** 39 tests. Permission rules are unit-tested exhaustively. Sharing, persistence, validation and import limits are tested end to end against the real database with three users.
+- **Automated:** 41 tests. Permission rules are unit-tested exhaustively. Sharing, persistence, validation and import limits are tested end to end against the real database with three users.
 - **Manual, in a real browser, every phase:** login and wrong password, create → format → reload, owner shares → recipient sees it under "Shared with me" → viewer gets read-only, and an import containing `<script>` / `<img onerror>` comes out clean.
 - **Live deploy checks after each merge:** `/api/health` reports the DB connected, protected routes return 401 without a token, and the SPA routes resolve.
 - **Security review of AI code:** the secret key is server-only, RLS blocks the browser by default (verified: the publishable key returns 0 rows), the client can't set `owner_id` (strict zod, tested), and imported HTML only passes through the editor schema.

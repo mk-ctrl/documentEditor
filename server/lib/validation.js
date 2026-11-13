@@ -35,6 +35,17 @@ export const shareSchema = z
   })
   .strict();
 
+export const signupSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Enter your name').max(80, 'Name must be 80 characters or fewer'),
+    email: z.string().trim().toLowerCase().email('Enter a valid email address'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .max(72, 'Password must be 72 characters or fewer'),
+  })
+  .strict();
+
 /** Parse `data` with `schema` or throw a 400 with the first human-readable issue. */
 export function parse(schema, data) {
   const result = schema.safeParse(data ?? {});

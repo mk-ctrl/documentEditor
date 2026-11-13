@@ -74,7 +74,7 @@ Running the HTML through the editor's own schema **is** the sanitizer: anything 
 | Decision | Why | Cost / next step |
 |---|---|---|
 | Last-write-wins saves | Real-time sync (CRDT) is a project of its own | Next: optimistic concurrency with `updated_at` and 409 + prompt; later Yjs |
-| Seeded users, no sign-up | The brief allows it, and reviewers can test sharing in one click | Sign-up via Supabase Auth is a small addition |
+| Server-side sign-up (admin API, pre-confirmed) + seeded demo users | No email round trip, so reviewers can create accounts instantly; demo users still allow one-click sharing tests | Production would add email verification, password reset and rate limiting |
 | Integration tests on real Supabase | They exercise the real permission path, not mocks | Slower (~28 s) and need a configured `.env`; they skip cleanly otherwise |
 | Import creates new docs only | Clear, testable behavior | "Insert into current doc" reuses the same pipeline |
 | Plain CSS with tokens, no UI kit | A distinct look (paper on a desk) instead of stock components | More CSS to own |

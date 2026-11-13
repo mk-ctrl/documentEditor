@@ -1,6 +1,7 @@
 import express from 'express';
 import healthRouter from './routes/health.js';
 import meRouter from './routes/me.js';
+import authRouter from './routes/auth.js';
 import documentsRouter from './routes/documents.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { HttpError } from './lib/httpError.js';
@@ -16,6 +17,7 @@ export function createApp() {
 
   // Public
   app.use('/api/health', healthRouter);
+  app.use('/api/auth', authRouter);
 
   // Everything below requires a signed-in user
   app.use('/api/me', requireAuth, meRouter);

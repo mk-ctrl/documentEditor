@@ -149,6 +149,39 @@ describe.skipIf(!configured)('documents API (integration)', () => {
     expect(none.status).toBe(400);
   });
 
+  it('sign-up: new account can sign in and be shared with; duplicates are rejected', async () => {
+    const email = `signup-test-${Date.now()}@example.com`;
+    const password = 'test-password-123';
+    const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+    let userId;
+    try {
+      const res = await request(app).post('/api/auth/signup').send({ name: 'Signup Test', email, password });
+      expect(res.status).toBe(201);
+      userId = res.body.id;
+
+      const dup = await request(app).post('/api/auth/signup').send({ name: 'Again', email, password });
+      expect(dup.status).toBe(409);
+
+      // the new user can sign in, and their profile (created by the DB trigger) has their name
+      const client = createClient(env.SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      expect(error).toBeNull();
+      const me = await request(app).get('/api/me').set('Authorization', `Bearer ${data.session.access_token}`);
+      expect(me.body).toMatchObject({ email, name: 'Signup Test' });
+
+      // and is immediately shareable by email
+      const list = await request(app).get('/api/documents').set(as('alice'));
+      const welcome = list.body.owned.find((d) => d.title === 'Welcome to Quire');
+      const share = await request(app)
+        .post(`/api/documents/${welcome.id}/shares`)
+        .set(as('alice'))
+        .send({ email, role: 'viewer' });
+      expect(share.status).toBe(201);
+    } finally {
+      if (userId) await admin.auth.admin.deleteUser(userId); // cascades to profile + shares
+    }
+  });
+
   it('validates input', async () => {
     const empty = await request(app).post('/api/documents').set(as('alice')).send({ title: '   ' });
     expect(empty.status).toBe(400);
