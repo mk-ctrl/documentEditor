@@ -1,5 +1,7 @@
 import express from 'express';
 import healthRouter from './routes/health.js';
+import meRouter from './routes/me.js';
+import { requireAuth } from './middleware/requireAuth.js';
 import { HttpError } from './lib/httpError.js';
 
 // Builds the Express app WITHOUT calling listen(), so the same app is used by:
@@ -11,7 +13,11 @@ export function createApp() {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
 
+  // Public
   app.use('/api/health', healthRouter);
+
+  // Everything below requires a signed-in user
+  app.use('/api/me', requireAuth, meRouter);
 
   // Unknown API route → JSON 404 (never the HTML index page)
   app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Not found')));

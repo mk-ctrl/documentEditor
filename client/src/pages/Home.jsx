@@ -1,26 +1,23 @@
-import { useEffect, useState } from 'react';
-import { api } from '../lib/api.js';
+import { useAuth } from '../lib/auth.jsx';
+import Brand from '../components/Brand.jsx';
+import Avatar from '../components/Avatar.jsx';
 
-// Phase 0 placeholder: proves the React app, the /api proxy and the database are all wired up.
+// Phase 1 placeholder for the dashboard (replaced in Phase 2).
 export default function Home() {
-  const [status, setStatus] = useState({ state: 'loading' });
-
-  useEffect(() => {
-    api('/health')
-      .then((data) => setStatus({ state: 'ok', data }))
-      .catch((err) => setStatus({ state: 'error', message: err.message }));
-  }, []);
-
+  const { profile, user, signOut } = useAuth();
   return (
-    <main className="placeholder">
-      <h1>Docs</h1>
-      <p>Scaffold is live.</p>
-      <p className="status">
-        API:{' '}
-        {status.state === 'loading' && 'checking…'}
-        {status.state === 'ok' && `ok · database ${status.data.db ? 'connected' : 'unreachable'}`}
-        {status.state === 'error' && `error · ${status.message}`}
-      </p>
-    </main>
+    <div className="center-state">
+      <div>
+        <Brand />
+        <h1 style={{ marginTop: 24 }}>Hi, {profile?.name?.split(' ')[0] ?? '…'}</h1>
+        <p>You're signed in as {user?.email}.</p>
+        <div style={{ display: 'inline-flex', gap: 12, alignItems: 'center' }}>
+          <Avatar name={profile?.name} email={user?.email} />
+          <button className="btn btn-ink btn-sm" onClick={signOut}>
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
