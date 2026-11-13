@@ -10,3 +10,7 @@ coverage/
 
 # Personal recording script (not part of the submission)
 VIDEO_SCRIPT.md
+VIDEO_SCRIPT.pdf
+
+# Local Drive-upload package (built from the repo)
+submission/
