@@ -59,6 +59,16 @@ supabase/ schema.sql, seed script
 
 ---
 
+## Re-plan after Phase 1 (about 1h45m left)
+Phase 5 is folded into each phase: tests ship with the feature. The stretch goal is dropped.
+| Phase | Budget |
+|---|---|
+| 2 Editor + dashboard (Quire UI) | 40m |
+| 3 Sharing | 20m |
+| 4 Upload (.txt/.md/.docx → new doc) | 15m |
+| 6 Docs (README, ARCHITECTURE, AI_WORKFLOW, SUBMISSION) | 20m |
+| Video (recorded by me) | 10m |
+
 ## Phase 0: Scaffold and deploy skeleton (`main`), ~25 min
 Repo: `github.com/mk-ctrl/documentEditor` (public, empty). Secrets never get committed.
 
