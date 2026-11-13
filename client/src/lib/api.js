@@ -4,10 +4,16 @@
 // - Turns non-2xx responses into thrown errors carrying the server's message and status
 
 let getToken = async () => null;
+let onUnauthorized = () => {};
 
 /** Called once by the auth layer so every request carries the current access token. */
 export function setTokenProvider(fn) {
   getToken = fn;
+}
+
+/** Called once by the auth layer: what to do when the server says the session is no longer valid. */
+export function setUnauthorizedHandler(fn) {
+  onUnauthorized = fn;
 }
 
 export class ApiError extends Error {
@@ -38,6 +44,7 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
 
   const data = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
+    if (res.status === 401 && token) onUnauthorized();
     throw new ApiError(data?.error || `Request failed (${res.status})`, res.status);
   }
   return data;

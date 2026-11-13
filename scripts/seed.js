@@ -63,7 +63,12 @@ async function ensureDoc(ownerId, title, content, shares) {
     .eq('owner_id', ownerId)
     .eq('title', title)
     .maybeSingle();
-  if (found) return;
+  if (found) {
+    // Re-seeding resets starter content so the demo always starts from a known state.
+    const { error } = await db.from('documents').update({ content: { type: 'doc', content } }).eq('id', found.id);
+    if (error) throw error;
+    return;
+  }
 
   const { data: doc, error } = await db
     .from('documents')
@@ -93,7 +98,6 @@ await ensureDoc(
   alice,
   'Welcome to Quire',
   [
-    h(1, 'Welcome to Quire'),
     p('A quiet place to write, edit and share documents.'),
     h(2, 'Try it out'),
     ul([
@@ -110,7 +114,6 @@ await ensureDoc(
   bob,
   'Q3 planning notes',
   [
-    h(1, 'Q3 planning notes'),
     p('Alice has editor access to this document, so she can change it.'),
     h(2, 'Priorities'),
     ul(['Ship the editor', 'Tighten sharing', 'Write the docs']),

@@ -1,11 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from './supabase.js';
-import { api, setTokenProvider } from './api.js';
+import { api, setTokenProvider, setUnauthorizedHandler } from './api.js';
 
 // Every API call carries the current Supabase access token (refreshed automatically by supabase-js).
 setTokenProvider(async () => {
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
+});
+
+// Server rejected our token (revoked/expired session) → clear it locally; RequireAuth redirects to /login.
+setUnauthorizedHandler(() => {
+  supabase.auth.signOut({ scope: 'local' });
 });
 
 const AuthContext = createContext(null);
