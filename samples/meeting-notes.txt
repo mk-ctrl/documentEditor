@@ -1,0 +1,7 @@
+Meeting notes - 14 Nov
+
+Attendees: Alice, Bob, Carol
+
+Decisions:
+Ship sharing this week.
+Import supports txt, md and docx.

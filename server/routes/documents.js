@@ -2,10 +2,32 @@ import { Router } from 'express';
 import { supabaseAdmin } from '../lib/supabaseAdmin.js';
 import { requireDocAccess } from '../lib/access.js';
 import { parse, createDocumentSchema, updateDocumentSchema } from '../lib/validation.js';
+import multer from 'multer';
 import sharesRouter from './shares.js';
+import { fileToHtml, titleFromFilename, MAX_IMPORT_BYTES } from '../lib/importFile.js';
+import { HttpError } from '../lib/httpError.js';
 
 const router = Router();
 router.use('/:id/shares', sharesRouter);
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_IMPORT_BYTES, files: 1 } });
+
+// POST /api/documents/import (multipart, field "file") → { title, html }
+// The client turns the HTML into editor JSON (sanitizing it through the editor schema),
+// then creates the document with the regular POST /api/documents.
+router.post('/import', (req, res, next) => {
+  upload.single('file')(req, res, async (err) => {
+    try {
+      if (err?.code === 'LIMIT_FILE_SIZE') throw new HttpError(413, 'File is too large. The limit is 2 MB.');
+      if (err) throw new HttpError(400, 'Upload failed. Send one file in the "file" field.');
+      if (!req.file) throw new HttpError(400, 'Choose a file to import');
+      const html = await fileToHtml(req.file);
+      res.json({ title: titleFromFilename(req.file.originalname), html });
+    } catch (e) {
+      next(e);
+    }
+  });
+});
 const LIST_FIELDS = 'id, title, owner_id, created_at, updated_at';
 
 // GET /api/documents → { owned: [...], shared: [...] }

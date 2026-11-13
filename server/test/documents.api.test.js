@@ -127,6 +127,28 @@ describe.skipIf(!configured)('documents API (integration)', () => {
     expect((await request(app).get(`/api/documents/${id}`).set(as('carol'))).status).toBe(403);
   });
 
+  it('import: converts an upload and enforces type and size limits', async () => {
+    const ok = await request(app)
+      .post('/api/documents/import')
+      .set(as('alice'))
+      .attach('file', Buffer.from('# Hello\n\n- a\n- b'), 'My_notes.md');
+    expect(ok.status).toBe(200);
+    expect(ok.body.title).toBe('My notes');
+    expect(ok.body.html).toContain('<h1>Hello</h1>');
+
+    const pdf = await request(app).post('/api/documents/import').set(as('alice')).attach('file', Buffer.from('%PDF'), 'x.pdf');
+    expect(pdf.status).toBe(415);
+
+    const big = await request(app)
+      .post('/api/documents/import')
+      .set(as('alice'))
+      .attach('file', Buffer.alloc(2 * 1024 * 1024 + 1, 97), 'big.txt');
+    expect(big.status).toBe(413);
+
+    const none = await request(app).post('/api/documents/import').set(as('alice'));
+    expect(none.status).toBe(400);
+  });
+
   it('validates input', async () => {
     const empty = await request(app).post('/api/documents').set(as('alice')).send({ title: '   ' });
     expect(empty.status).toBe(400);
